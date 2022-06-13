@@ -102,8 +102,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
     //создаем Modal
     const modalTrigger = document.querySelectorAll('[data-modal]'),
-        modal = document.querySelector('.modal'),
-        modalClosed = document.querySelector('[data-closed]');
+        modal = document.querySelector('.modal');
+      
 
     function openModal() {
         modal.classList.add('show');
@@ -121,10 +121,10 @@ window.addEventListener('DOMContentLoaded', () => {
         modal.classList.remove('show');
         document.body.style.overflow = ''
     }
-    modalClosed.addEventListener('click', closeModal);
+    
 
     modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
+        if (e.target === modal|| e.target.getAttribute('data-closed')=== '') {
             closeModal()
         }
     });
@@ -134,7 +134,7 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    const modalTimerId = setTimeout(openModal, 3000);
+    const modalTimerId = setTimeout(openModal, 50000);
 
     function showModalByScroll() {
         if (window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight - 1) {
@@ -147,7 +147,7 @@ window.addEventListener('DOMContentLoaded', () => {
     // используем классы для карточек
 
     class MenuCard {
-        constructor(src, alt, title, descr, price, parentSelector,...classes) {
+        constructor(src, alt, title, descr, price, parentSelector, ...classes) {
             this.src = src;
             this.alt = alt;
             this.title = title;
@@ -210,66 +210,89 @@ window.addEventListener('DOMContentLoaded', () => {
         20,
         '.menu .container'
     ).render();
-  
- //  ОТПРАВКА FORMS 
+    //  ОТПРАВКА FORMS 
 
- const forms = document.querySelectorAll('form');
+    const forms = document.querySelectorAll('form');
 
- //создаем  оповещение  
- const message = {
-     loading: 'Загрузка',
-     success: 'Спасибо,мы с вами свяжемся',
-     failure: 'Что-то пошло не так'
- }
- forms.forEach(item => {
-     postData(item);
- })
+    //создаем  оповещение  
+    const message = {
+        loading: 'img/form/spinner.svg',
+        success: 'Спасибо,мы с вами свяжемся',
+        failure: 'Что-то пошло не так'
+    }
+    forms.forEach(item => {
+        postData(item);
+    })
 
- //1.создаем функцию отправки
- function postData(form) {
-     form.addEventListener('submit', (e) => {
-         e.preventDefault(); //отмена перезагрузки
+    //1.создаем функцию отправки
+    function postData(form) {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault(); //отмена перезагрузки
 
-         //2.создаем блок оповещения
-         const statusMessage = document.createElement('div');
-         statusMessage.classList.add('status');
-         statusMessage.textContent = message.loading;
-         form.append(statusMessage)
+            //2.создаем блок оповещения
+            const statusMessage = document.createElement('img');
+            statusMessage.src = message.loading;
+            statusMessage.style, cssText = `
+                display:block;
+                matgin:0 auto;            
+            `;
+            form.insertAdjacentElement('afterend',statusMessage)
 
 
-         //3.создаем новый запрос   
-         const request = new XMLHttpRequest();
-         request.open("POST", "server.php");
+            //3.создаем новый запрос   
+            const request = new XMLHttpRequest();
+            request.open("POST", "server.php");
 
-         request.setRequestHeader('Content-type', 'application/json')
+            request.setRequestHeader('Content-type', 'application/json')
 
-         //4.создаем сборщик данных из формы  
-         const formData = new FormData(form);
+            //4.создаем сборщик данных из формы  
+            const formData = new FormData(form);
 
-         const object = {};
-         formData.forEach(function (value, key) {
-             object[key] = value
-         })
-         const json = JSON.stringify(object);
+            const object = {};
+            formData.forEach(function (value, key) {
+                object[key] = value
+            })
+            const json = JSON.stringify(object);
 
-         request.send(json);
+            request.send(json);
 
-         request.addEventListener('load', () => {
-             
-             if (request.status === 200) {
-                 console.log(request.response);
-                 statusMessage.textContent = message.success;
-                 form.reset()//очистка формы
-                 setTimeout(() => {
-                     statusMessage.remove()
-                 },2000)
-             } else {
-                 statusMessage.textContent = message.failure;
-             }
-         })
-         // сброс кэша Shift+Fn+F5
+            request.addEventListener('load', () => {
+                
+                if (request.status === 200) {
+                    console.log(request.response);
+                    showThanksModal(message.success);
+                    form.reset()//очистка формы
+                        statusMessage.remove()    
+                } else {
+                    showThanksModal(message.failure);
+                }
+            })
+            // сброс кэша Shift+Fn+F5
 
-     })
- }
+        })
+    }
+    //создаем оповещение пользователя в новом модальном окне
+
+    function showThanksModal(message) {
+        const prevModalDialog = document.querySelector('.modal__dialog');
+        prevModalDialog.classList.add('hidden');
+        openModal();
+
+        const thanksModal = document.createElement('div');
+        thanksModal.classList.add('modal__dialog');
+        thanksModal.innerHTML = `
+        <div class = 'modal__content'>
+            <div class="modal__close" data-closed >&times;</div>
+            <div class="modal__title">${message}</div>
+        </div>
+        `
+        document.querySelector('.modal').append(thanksModal);
+        setTimeout(() => {
+            thanksModal.remove();
+            prevModalDialog.classList.add('show');
+            prevModalDialog.classList.remove('hidden');
+            closeModal();
+        },4000)
+    }
 
 });
