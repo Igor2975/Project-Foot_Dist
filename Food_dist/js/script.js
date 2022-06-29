@@ -39,7 +39,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     //создаем Timer
 
-    const deadline = '2022-05-25';
+    const deadline = '2022-06-30';
 
     function getTimeRemaining(endtime) {
         let days, hours, minutes, seconds
@@ -232,67 +232,82 @@ window.addEventListener('DOMContentLoaded', () => {
             //2.создаем блок оповещения
             const statusMessage = document.createElement('img');
             statusMessage.src = message.loading;
-            statusMessage.style, cssText = `
+            statusMessage.style. cssText = `
                 display:block;
                 matgin:0 auto;            
             `;
             form.insertAdjacentElement('afterend',statusMessage)
 
 
-            //3.создаем новый запрос   
-            const request = new XMLHttpRequest();
-            request.open("POST", "server.php");
+             //3.создаем сборщик данных из формы  
+             const formData = new FormData(form);
 
-            request.setRequestHeader('Content-type', 'application/json')
-
-            //4.создаем сборщик данных из формы  
-            const formData = new FormData(form);
-
-            const object = {};
-            formData.forEach(function (value, key) {
-                object[key] = value
-            })
-            const json = JSON.stringify(object);
-
-            request.send(json);
-
-            request.addEventListener('load', () => {
-                
-                if (request.status === 200) {
-                    console.log(request.response);
-                    showThanksModal(message.success);
-                    form.reset()//очистка формы
-                        statusMessage.remove()    
-                } else {
-                    showThanksModal(message.failure);
-                }
-            })
-            // сброс кэша Shift+Fn+F5
-
-        })
-    }
-    //создаем оповещение пользователя в новом модальном окне
-
-    function showThanksModal(message) {
-        const prevModalDialog = document.querySelector('.modal__dialog');
-        prevModalDialog.classList.add('hidden');
-        openModal();
-
-        const thanksModal = document.createElement('div');
-        thanksModal.classList.add('modal__dialog');
-        thanksModal.innerHTML = `
-        <div class = 'modal__content'>
-            <div class="modal__close" data-closed >&times;</div>
-            <div class="modal__title">${message}</div>
-        </div>
-        `
-        document.querySelector('.modal').append(thanksModal);
-        setTimeout(() => {
-            thanksModal.remove();
-            prevModalDialog.classList.add('show');
-            prevModalDialog.classList.remove('hidden');
-            closeModal();
-        },4000)
-    }
-
+             // const object = {};
+             // formData.forEach(function (value, key) {
+             //     object[key] = value
+             // })
+             // const json = JSON.stringify(object);
+ 
+            //4.создаем новый запрос
+             fetch('server.php', {
+                 method: 'POST',
+                 // headers: {
+                 //     'Content-type': 'application/json'
+                 // },
+                 body:formData
+             }).then(data =>data.text())
+                 .then(data => {
+                   console.log(data);
+                   showThanksModal(message.success);
+                   statusMessage.remove()
+             }).catch(() => {
+                 showThanksModal(message.failure);
+             }).finally(() => {
+                 form.reset()//очистка формы
+             })
+ 
+         })
+     }
+     //создаем оповещение пользователя в новом модальном окне
+ 
+     function showThanksModal(message) {
+         const prevModalDialog = document.querySelector('.modal__dialog');
+         prevModalDialog.classList.add('hidden');
+         openModal();
+ 
+         const thanksModal = document.createElement('div');
+         thanksModal.classList.add('modal__dialog');
+         thanksModal.innerHTML = `
+         <div class = 'modal__content'>
+             <div class="modal__close" data-closed >&times;</div>
+             <div class="modal__title">${message}</div>
+         </div>
+         `
+         document.querySelector('.modal').append(thanksModal);
+         setTimeout(() => {
+             thanksModal.remove();
+             prevModalDialog.classList.add('show');
+             prevModalDialog.classList.remove('hidden');
+             closeModal();
+         },4000)
+     }
+ 
+     // Пример GET запроса через fetch
+ 
+     // fetch('https://jsonplaceholder.typicode.com/todos/1')
+     //     .then(response => response.json())
+     //     .then(json => console.log(json));
+     
+      // Пример POST запроса через fetch
+     
+     // fetch('https://jsonplaceholder.typicode.com/posts', {
+     //     method: "POST",
+     //     body: JSON.stringify({ name: 'Alex' }),
+     //     headers: {
+     //         'Content-type': 'application/json'
+     //     }
+     //  })
+     //  .then(response => response.json())
+     //  .then(json => console.log(json))
+ 
 });
