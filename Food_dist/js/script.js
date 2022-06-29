@@ -290,7 +290,7 @@ window.addEventListener('DOMContentLoaded', () => {
              prevModalDialog.classList.remove('hidden');
              closeModal();
          },4000)
-     }
+    }
  
      // Пример GET запроса через fetch
  
