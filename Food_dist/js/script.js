@@ -242,19 +242,19 @@ window.addEventListener('DOMContentLoaded', () => {
              //3.создаем сборщик данных из формы  
              const formData = new FormData(form);
 
-             // const object = {};
-             // formData.forEach(function (value, key) {
-             //     object[key] = value
-             // })
-             // const json = JSON.stringify(object);
+             const object = {};
+             formData.forEach(function (value, key) {
+                 object[key] = value
+             })
+             
  
             //4.создаем новый запрос
              fetch('server.php', {
                  method: 'POST',
-                 // headers: {
-                 //     'Content-type': 'application/json'
-                 // },
-                 body:formData
+                 headers: {
+                     'Content-type': 'application/json'
+                 },
+                 body:JSON.stringify(object)
              }).then(data =>data.text())
                  .then(data => {
                    console.log(data);
